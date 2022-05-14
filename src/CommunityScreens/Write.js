@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Button,
+  Image,
 } from 'react-native';
 import AppHeader from '../Custom/AppHeaders';
 import {
@@ -16,11 +17,53 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/AntDesign';
 import axios from 'axios';
 import I18n from '../../i18n';
+import * as ImagePicker from 'expo-image-picker';
 
 function Write(props) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [std_id, setStd_id] = useState();
+  const [parentHeight, setParentHeight] = useState(0);
+  const [parentWidth, setParentWidth] = useState(0);
+  const [imgArr, setImgArr] = useState([]);
+  const [count, setCount] = useState(0);
+
+  const uploadImg = (data) => {
+    let prevArr = imgArr;
+    prevArr.push(data);
+    setImgArr(prevArr);
+  };
+
+  let openImagePickerAsync = async () => {
+    let permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      return;
+    }
+
+    let pickerResult = await ImagePicker.launchImageLibraryAsync();
+
+    if (pickerResult.cancelled === true) {
+      return;
+    }
+    uploadImg({ localUri: pickerResult.uri });
+    setCount(count + 1);
+  };
+  const Images = () => {
+    const imgs = imgArr.map((el, index = 1) => {
+      return (
+        <View key={index}>
+          <Image
+            source={{ uri: el.localUri }}
+            style={{ width: 50, height: 50 }}
+          />
+        </View>
+      );
+    });
+    return imgs;
+  };
+
   // React.useEffect(() => {
   //   props.navigation.addListener('beforeRemove', (e) => {
   //     e.preventDefault();
@@ -54,7 +97,11 @@ function Write(props) {
     // axios.요청방식(url, {key:value},).then((res)=>console.log(data))
     //url : http://192.168.0.15/community/create_process
   };
-
+  const onLayout = (event) => {
+    const { height, width } = event.nativeEvent.layout;
+    setParentHeight(height);
+    setParentWidth(width);
+  };
   return (
     <>
       <AppHeader
@@ -62,6 +109,7 @@ function Write(props) {
         title={'작성'}
         navigation={props.navigation}
       ></AppHeader>
+      {imgArr ? <Images></Images> : <></>}
       <View style={{ flex: 1, backgroundColor: 'white' }}>
         <View style={{ flex: 1 }}>
           <TextInput
@@ -78,7 +126,61 @@ function Write(props) {
             placeholder={'제목'}
           ></TextInput>
         </View>
-        <View style={{ flex: 1, backgroundColor: '#e9e9e9' }}></View>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: '#e9e9e9',
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            alignItems: 'center',
+            height: '100%',
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              height: '60%',
+              width: '10%',
+            }}
+            onLayout={onLayout}
+            onPress={openImagePickerAsync}
+          >
+            <Image
+              source={require('../public/image.png')}
+              style={{
+                height: parentHeight > parentWidth ? parentWidth : parentHeight,
+                width: parentHeight > parentWidth ? parentWidth : parentHeight,
+              }}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              height: '70%',
+              width: '10%',
+            }}
+          >
+            <Image
+              source={require('../public/video.png')}
+              style={{
+                height: parentHeight > parentWidth ? parentWidth : parentHeight,
+                width: parentHeight > parentWidth ? parentWidth : parentHeight,
+              }}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              height: '70%',
+              width: '10%',
+            }}
+          >
+            <Image
+              source={require('../public/font.png')}
+              style={{
+                height: parentHeight > parentWidth ? parentWidth : parentHeight,
+                width: parentHeight > parentWidth ? parentWidth : parentHeight,
+              }}
+            />
+          </TouchableOpacity>
+        </View>
         <View style={{ flex: 5, backgroundColor: 'white' }}>
           <TextInput
             style={{

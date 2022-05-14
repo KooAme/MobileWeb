@@ -1,0 +1,8 @@
+# Node
+node_modules/
+# Expo
+.expo
+__generated__
+
+# macOS
+.DS_Store
